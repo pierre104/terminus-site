@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1776: the engine starts — Terminus</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<style>:root { --ink: #2B2420; --paper: #FAF5EC; --grey: #8C8174; --panel: #FFFFFF; --line-1: #3A82C4; --line-2: #D9473A; --line-3: #8C55B0; --line-4: #2E9468; --sans: 'Comic Neue', 'Pangolin', system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif; --serif: 'Literata', Georgia, 'Songti SC', SimSun, serif; }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1rem/1.5 var(--sans); }
+a { color: inherit; }
+.l-L1 { --accent: var(--line-1); } .l-L2 { --accent: var(--line-2); }
+.l-L3 { --accent: var(--line-3); } .l-L4 { --accent: var(--line-4); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+.narrow { max-width: 720px; }
+
+/* header + permanent line bar */
+:root { --head-h: 52px; }
+.site-head { position: sticky; top: 0; z-index: 30; }
+.head-row { display: flex; align-items: center; gap: 16px; height: var(--head-h); }
+.wordmark { text-decoration: none; flex: 1; }
+.site-head .wrap { max-width: none; padding-left: 20px; padding-right: 20px; }
+
+/* line chip: number + name, always in the line colour */
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 4px; border-radius: 14px;
+  background: var(--accent); color: #fff; font: 700 0.85rem/1 var(--sans); text-decoration: none; white-space: nowrap; }
+.chip b { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 11px;
+  background: rgba(255, 255, 255, 0.92); color: var(--accent); font-size: 0.75rem; }
+.chip.big { height: 36px; border-radius: 18px; font-size: 1rem; padding-right: 16px; }
+.chip.big b { min-width: 28px; height: 28px; border-radius: 14px; font-size: 0.85rem; }
+
+.h-display { font: 700 clamp(2.4rem, 6vw, 3.6rem)/1.02 var(--sans); margin: 0; letter-spacing: -0.01em; }
+.h-sec { font: 700 1.5rem/1.2 var(--sans); margin: 0 0 18px; }
+.tag { font: 700 0.75rem/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
+section { margin: 0 0 72px; }
+
+/* layout: slim rail always on the left, full pane opens beside it */
+.layout { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.content { min-width: 0; }
+.sidenav { position: sticky; top: var(--head-h); align-self: start; height: calc(100vh - var(--head-h)); display: flex; z-index: 20;
+  border-right: 1px solid color-mix(in srgb, var(--grey) 30%, transparent); background: var(--paper); }
+.rail { width: 60px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; }
+.rail-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--ink); cursor: pointer; text-decoration: none; }
+.rail-btn:hover { background: color-mix(in srgb, var(--grey) 16%, transparent); }
+.rail-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.rail-sep { width: 28px; height: 1px; margin: 6px 0; background: color-mix(in srgb, var(--grey) 35%, transparent); }
+.rail-line { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%;
+  border: 0; background: var(--accent); color: #fff; font: 700 0.95rem/1 var(--sans); cursor: pointer; }
+.rail-line:hover { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.rail-line.current { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--accent); }
+.pane { display: none; width: 260px; height: 100%; overflow-y: auto; padding: 16px 14px 32px 4px; }
+body.nav-open .pane { display: block; }
+.sn-search { position: relative; margin: 0 0 14px; }
+.sn-search input { width: 100%; height: 40px; padding: 0 36px 0 12px; border: 1.5px solid var(--ink); border-radius: 20px;
+  background: var(--panel); color: var(--ink); font: 400 0.95rem var(--sans); }
+.sn-search input:focus { outline: 3px solid color-mix(in srgb, var(--line-1) 40%, transparent); outline-offset: 1px; }
+.sn-search kbd { position: absolute; right: 10px; top: 10px; padding: 1px 6px; border: 1px solid var(--grey); border-radius: 4px;
+  color: var(--grey); font: 600 0.7rem/1.4 var(--sans); }
+.sn-home { display: block; padding: 6px 4px 12px; font-weight: 700; text-decoration: none; }
+.sn-tree details { margin: 0 0 6px; }
+.sn-tree summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 6px 4px; cursor: pointer; list-style: none; border-radius: 8px; }
+.sn-tree summary::-webkit-details-marker { display: none; }
+.sn-tree summary::before { content: "▸"; color: var(--grey); width: 10px; }
+.sn-tree details[open] > summary::before { content: "▾"; }
+.sn-tree summary:hover { background: color-mix(in srgb, var(--grey) 12%, transparent); }
+.sn-tree summary small { flex-basis: 100%; padding-left: 18px; color: var(--grey); font-size: 0.8rem; }
+.sn-sub { padding: 10px 8px 2px; color: var(--grey); font: 700 0.72rem/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; }
+.sn-q a { color: var(--grey); }
+.sn-tree ul { list-style: none; margin: 2px 0 8px 13px; padding: 0 0 0 12px; border-left: 3px solid var(--accent); }
+.sn-tree li a { display: block; padding: 5px 8px; border-radius: 6px; text-decoration: none; font-size: 0.92rem; line-height: 1.3; }
+.sn-tree li a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.sn-tree li a[aria-current] { background: var(--accent); color: #fff; font-weight: 700; }
+.sn-id { display: block; color: var(--grey); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; }
+.sn-tree li a[aria-current] .sn-id { color: rgba(255, 255, 255, 0.85); }
+.sn-empty { color: var(--grey); }
+.sn-legal { display: block; margin: 24px 4px 0; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--grey) 30%, transparent); color: var(--grey); font-size: 0.85rem; }
+.content main { padding-bottom: 48px; }
+@media (max-width: 1000px) {
+  .rail { width: 52px; }
+  .pane { position: fixed; top: var(--head-h); bottom: 0; left: 52px; width: min(300px, calc(100vw - 64px)); background: var(--paper);
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.35); }
+}
+
+/* comic grid: 3 columns, panels of 1, 2 or 3 columns */
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.cell { position: relative; min-height: 260px; border-radius: 6px; }
+.c-wide { grid-column: span 2; }
+.c-full { grid-column: 1 / -1; min-height: 300px; }
+.c-tall { grid-row: span 2; }
+.frame { background: var(--panel); border: 1.5px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.frame .desc { margin: auto 18px; text-align: center; color: var(--grey); font: italic 400 0.95rem/1.4 var(--serif); }
+.narr { position: absolute; top: 12px; left: 12px; max-width: 70%; padding: 8px 12px; background: var(--paper);
+  border: 1.5px solid var(--ink); font: 700 0.95rem/1.3 var(--sans); }
+.balloon { position: absolute; max-width: 62%; padding: 12px 16px; background: var(--panel); border: 1.5px solid var(--ink);
+  font: 700 1.05rem/1.3 var(--sans); }
+.balloon::after { content: ""; position: absolute; bottom: -12px; left: 28px; width: 18px; height: 18px; background: var(--panel);
+  border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: rotate(45deg) skew(12deg, 12deg); }
+.balloon.tl { top: 16px; left: 16px; } .balloon.tr { top: 16px; right: 16px; }
+.panel-no { position: absolute; bottom: 8px; right: 10px; }
+
+/* takeaway cell */
+.takeaways { background: color-mix(in srgb, var(--accent) 9%, #fff); border: 1.5px solid var(--accent); padding: 22px; }
+.takeaways ol { list-style: none; counter-reset: k; margin: 12px 0 0; padding: 0; }
+.takeaways li { counter-increment: k; position: relative; padding: 0 0 16px 40px; font: 700 1.05rem/1.35 var(--sans); }
+.takeaways li:last-child { padding-bottom: 0; }
+.takeaways li::before { content: counter(k); position: absolute; left: 0; top: -2px; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; font-size: 0.9rem; }
+
+/* navigation cells: related and next sit on the comic grid */
+.nav-cell { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; padding: 20px; text-decoration: none;
+  border: 2px solid var(--accent); background: var(--panel); }
+.nav-cell:hover { background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.cell-title { font: 700 1.35rem/1.2 var(--sans); }
+.nav-cell .chip { align-self: flex-start; }
+.cell.nav-cell { min-height: 0; padding: 16px 18px; gap: 10px; justify-content: flex-start; }
+.nav-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.nav-cell svg { width: 100%; max-width: 260px; height: auto; }
+.nav-cell .cell-title { font-size: 1.15rem; }
+.arrow { font: 700 1.6rem/1 var(--sans); color: var(--accent); align-self: flex-end; }
+
+@media (max-width: 760px) {
+  .grid3 { grid-template-columns: 1fr; }
+  .c-wide, .c-full { grid-column: auto; }
+  .c-tall { grid-row: auto; }
+}
+
+/* home */
+.cover { padding-top: 24px; margin-bottom: 0; }
+.cover .h-display { margin-bottom: 20px; }
+/* the whole comic fits the screen with the first lines of the manifesto showing below it on landing:
+   header 52 + top 24 + gap 20 + about three lines of text 110 */
+.cover-comic { display: block; max-width: 100%; max-height: calc(100vh - 206px); width: auto; height: auto; margin: 0 auto 20px; background: #fff; }
+.manifesto { font: 400 1.35rem/1.55 var(--serif); }
+.manifesto p { margin: 0 0 1em; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.map-fig { margin: 0 0 18px; overflow-x: auto; }
+.map-fig svg { display: block; width: 100%; min-width: 900px; height: auto; }
+.m-line { fill: none; stroke: var(--accent); stroke-width: 8px; stroke-linecap: round; stroke-linejoin: round; }
+.m-sleepers { fill: none; stroke: var(--accent); stroke-width: 18px; stroke-dasharray: 3 11; opacity: 0.55; }
+.explore { --accent: color-mix(in srgb, var(--grey) 45%, var(--paper)); }
+.m-path { fill: none; stroke: var(--accent); stroke-width: 6px; stroke-linecap: round; stroke-dasharray: 0.1 13; }
+.m-st, .m-end { fill: var(--paper); stroke: var(--accent); stroke-width: 5px; }
+.m-label { font: 700 14px var(--sans); fill: var(--ink); }
+.m-status { font: 700 10.5px var(--sans); letter-spacing: 0.06em; fill: var(--grey); text-transform: uppercase; }
+.m-name { font: 700 17px var(--sans); fill: var(--accent); letter-spacing: 0.02em; text-transform: uppercase; }
+.m-sub { font: 400 13px var(--sans); fill: var(--grey); }
+.m-term { fill: var(--ink); }
+.m-term-t { font: 700 15px var(--sans); fill: var(--ink); letter-spacing: 0.3em; }
+.map-fig a:hover .m-st { stroke-width: 6px; }
+.head-right { display: flex; align-items: center; gap: 18px; }
+/* language menu: a small flag that opens onto the four languages */
+.lang-menu { position: relative; font: 700 0.85rem/1 var(--sans); }
+.lang-menu summary { list-style: none; display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 6px; cursor: pointer; opacity: 0.85; }
+.lang-menu summary::-webkit-details-marker { display: none; }
+.lang-menu summary::after { content: ""; width: 5px; height: 5px; margin-left: 1px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: translateY(-2px) rotate(45deg); }
+.lang-menu summary:hover, .lang-menu[open] summary { opacity: 1; background: color-mix(in srgb, var(--paper) 14%, transparent); }
+.lang-menu .lm-code { font-size: 0.75rem; letter-spacing: 0.06em; }
+.flag { display: inline-flex; width: 21px; height: 14px; flex: none; border-radius: 2px; overflow: hidden; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25); }
+.flag svg { width: 100%; height: 100%; }
+.lang-menu ul { position: absolute; right: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none; min-width: 160px;
+  background: var(--panel); border-radius: 8px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); z-index: 40; }
+.site-head .lang-menu ul a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; color: var(--ink); font-weight: 400; text-decoration: none; }
+.lang-menu ul a:hover { background: color-mix(in srgb, var(--grey) 14%, transparent); }
+.lang-menu ul a[aria-current] { font-weight: 700; }
+@media (max-width: 600px) { .head-right .tag { display: none; } }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
+.card { display: flex; flex-direction: column; gap: 10px; }
+.card .thumb { aspect-ratio: 4 / 3; border: 1.5px solid var(--accent); border-radius: 6px; background: var(--panel);
+  display: flex; align-items: flex-end; padding: 10px; }
+.card h3 { font: 700 1.35rem/1.2 var(--sans); margin: 0; }
+.card h3 a { text-decoration: none; }
+.card p { margin: 0; font: 400 1.05rem/1.45 var(--serif); }
+.related { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 0.9rem; color: var(--grey); }
+.related a { color: var(--ink); font-weight: 700; }
+
+/* article */
+.art-head { padding: 36px 0 24px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.art-title { font: 700 clamp(2rem, 5vw, 3rem)/1.05 var(--sans); margin: 0; }
+.art-related { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--grey); }
+.art-related a { color: var(--ink); font-weight: 700; }
+.body-text { font: 400 1.2rem/1.65 var(--serif); }
+.body-text p { margin: 0 0 1.1em; }
+.sources { color: var(--grey); font-size: 0.9rem; }
+
+.site-head { background: var(--ink); color: var(--paper); }
+.site-head a { color: var(--paper); }
+.wordmark { font: 700 1.5rem/1 var(--sans); text-transform: uppercase; font-style: italic; }
+.h-display, .h-sec, .cell-title, .art-title { text-transform: uppercase; }
+.h-display { font-style: italic; }
+.balloon { border-radius: 22px; }
+.frame { border-radius: 10px; }
+</style>
+</head>
+<body class="bulle">
+<script>try { if (localStorage.getItem('terminus-nav') === '1' && matchMedia('(min-width: 1001px)').matches) document.body.classList.add('nav-open'); } catch (e) {}</script>
+<header class="site-head"><div class="wrap head-row"><a class="wordmark" href="/">Terminus</a><span class="head-right"><span class="tag">Where to from here?</span><details class="lang-menu"><summary aria-label="Language: English"><span class="flag"><svg viewBox="0 0 60 40"><g><path d="M0 0h60v40H0z" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0l60 40M60 0L0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="12"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="7"/></g></svg></span><span class="lm-code">EN</span></summary><ul><li><a href="/l1-01/" hreflang="en" lang="en" aria-current="true"><span class="flag"><svg viewBox="0 0 60 40"><g><path d="M0 0h60v40H0z" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0l60 40M60 0L0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="12"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="7"/></g></svg></span>English</a></li><li><a href="/fr/" hreflang="fr" lang="fr"><span class="flag"><svg viewBox="0 0 3 2"><path d="M0 0h1v2H0z" fill="#002654"/><path d="M1 0h1v2H1z" fill="#fff"/><path d="M2 0h1v2H2z" fill="#CE1126"/></svg></span>Français</a></li><li><a href="/ru/" hreflang="ru" lang="ru"><span class="flag"><svg viewBox="0 0 3 2"><path d="M0 0h3v2H0z" fill="#fff"/><path d="M0 .667h3v.667H0z" fill="#0039A6"/><path d="M0 1.333h3V2H0z" fill="#D52B1E"/></svg></span>Русский</a></li><li><a href="/zh/" hreflang="zh" lang="zh"><span class="flag"><svg viewBox="0 0 30 20"><path d="M0 0h30v20H0z" fill="#DE2910"/><path d="M5 2.2l1.3 3.9h4.1l-3.3 2.4 1.3 3.9L5 10 1.6 12.4l1.3-3.9L-.4 6.1h4.1z" fill="#FFDE00"/><g fill="#FFDE00"><circle cx="10" cy="2" r=".9"/><circle cx="12" cy="4" r=".9"/><circle cx="12" cy="7" r=".9"/><circle cx="10" cy="9" r=".9"/></g></svg></span>中文</a></li></ul></details></span></div></header>
+<div class="layout">
+<aside class="sidenav" id="sidenav" aria-label="All topics">
+<div class="rail">
+<button class="rail-btn sn-toggle" aria-controls="sn-pane" aria-expanded="false" title="Open navigation"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<button class="rail-btn rail-search" title="Search (/)" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+<a class="rail-btn" href="/" title="Home and map" aria-label="Home and map"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></a>
+<span class="rail-sep"></span>
+<button class="rail-line l-L1 current" data-line="L1" title="1 Momentum: How we got here" aria-label="Line 1, Momentum">1</button><button class="rail-line l-L2" data-line="L2" title="2 Endgame: How it ends" aria-label="Line 2, Endgame">2</button><button class="rail-line l-L3" data-line="L3" title="3 Déjà vu: It has happened before" aria-label="Line 3, Déjà vu">3</button><button class="rail-line l-L4" data-line="L4" title="4 Ways out: Where to from here" aria-label="Line 4, Ways out">4</button>
+</div>
+<div class="pane" id="sn-pane">
+<div class="sn-search"><input id="sn-q" type="search" placeholder="Search everything" aria-label="Search lines, stations and questions" autocomplete="off"><kbd>/</kbd></div>
+<a class="sn-home" href="/">Home and map</a>
+<nav class="sn-tree"><details class="l-L1" open><summary><span class="chip l-L1"><b>1</b>Momentum</span><small>How we got here</small></summary><ul><li><a href="/l1-01/" aria-current="page"><span class="sn-id">L1-01</span>1776: the engine starts</a></li><li><a href="#"><span class="sn-id">L1-02</span>Coal, rail and the timetable</a></li><li><a href="#"><span class="sn-id">L1-03</span>Electricity rewires the factory</a></li><li><a href="#"><span class="sn-id">L1-04</span>Oil and the mass-produced life</a></li><li><a href="#"><span class="sn-id">L1-05</span>From mainframe to pocket</a></li><li><a href="#"><span class="sn-id">L1-06</span>Software eats the firm</a></li><li><a href="#"><span class="sn-id">L1-07</span>Leader or manager?</a></li></ul></details><details class="l-L2"><summary><span class="chip l-L2"><b>2</b>Endgame</span><small>How it ends</small></summary><ul><li><a href="#"><span class="sn-id">L2-01</span>Diminishing returns</a></li><li><a href="#"><span class="sn-id">L2-02</span>Energy: the bill comes due</a></li><li><a href="#"><span class="sn-id">L2-03</span>Too connected to fail?</a></li><li><a href="#"><span class="sn-id">L2-04</span>Slow decline or sudden break?</a></li><li><a href="#"><span class="sn-id">L2-05</span>Three scenarios for 2050</a></li></ul></details><details class="l-L3"><summary><span class="chip l-L3"><b>3</b>Déjà vu</span><small>It has happened before</small></summary><ul><li><a href="#"><span class="sn-id">L3-01</span>The Bronze Age breakdown</a></li><li><a href="#"><span class="sn-id">L3-02</span>Rome&#x27;s long goodbye</a></li><li><a href="#"><span class="sn-id">L3-03</span>Kondratiev&#x27;s long waves</a></li><li><a href="#"><span class="sn-id">L3-04</span>Tainter: the price of complexity</a></li><li><a href="#"><span class="sn-id">L3-05</span>Creative destruction</a></li></ul></details><details class="l-L4"><summary><span class="chip l-L4"><b>4</b>Ways out</span><small>Where to from here</small></summary><ul><li><a href="#"><span class="sn-id">L4-01</span>What still works</a></li><li><a href="#"><span class="sn-id">L4-02</span>Skills that travel</a></li><li><a href="#"><span class="sn-id">L4-03</span>Your systems are older than you think</a></li><li><a href="#"><span class="sn-id">L4-04</span>The ERP question</a></li><li><a href="#"><span class="sn-id">L4-05</span>Small, local, repairable</a></li><li><a href="#"><span class="sn-id">L4-06</span>Terminus: all change</a></li><li class="sn-sub">Open questions</li><li class="sn-q"><a href="#">How do people keep busy?</a></li><li class="sn-q"><a href="#">How do power and domination translate?</a></li><li class="sn-q"><a href="#">What does education become?</a></li><li class="sn-q"><a href="#">Where is the next central station?</a></li></ul></details></nav>
+<p class="sn-empty" hidden>Nothing matches.</p>
+<a class="sn-legal" href="/legal/">Legal notice</a>
+</div>
+</aside>
+<div class="content">
+<main class="wrap l-L1">
+<div class="art-head"><a class="chip big l-L1" href="#"><b>1</b>Momentum</a><h1 class="art-title">1776: the engine starts</h1>
+<div class="art-related"><span class="tag">Related</span><a class="chip l-L4" href="#"><b>4</b>Ways out</a><a href="#">Why an ERP project takes ten years</a></div></div>
+<section class="grid3"><figure class="cell frame c-wide " style="margin:0"><p class="desc">A flooded mine gallery. Miners pass buckets from hand to hand.</p><div class="narr">1776. England&#x27;s mines are drowning.</div><span class="tag panel-no">1</span></figure><div class="cell takeaways l-L1"><span class="tag">Takeaways</span><ol><li>Watt&#x27;s engine did nothing new: the same work with a quarter of the coal.</li><li>Boulton and Watt sold savings, not engines: they took a third of the coal saved.</li><li>Once steam turned a shaft, the factory left the river and set its own clock.</li></ol></div><figure class="cell frame  " style="margin:0"><p class="desc">Boulton shows a small heap of coal beside a big one. Watt wipes his glasses.</p><div class="balloon tl">Same work. A quarter of the coal.</div><span class="tag panel-no">2</span></figure><figure class="cell frame  " style="margin:0"><p class="desc">A mine owner signs a contract. Boulton holds the pen.</p><div class="balloon tl">Pay us a third of what you save.</div><span class="tag panel-no">3</span></figure><figure class="cell frame  " style="margin:0"><p class="desc">A factory far from any river, a clock on its front, workers filing in.</p><div class="narr">The factory no longer needs the river. It has a clock.</div><span class="tag panel-no">4</span></figure><a class="cell nav-cell l-L4" href="#"><span class="tag">Related topic</span><span class="nav-top"><span class="chip l-L4"><b>4</b>Ways out</span><span class="arrow">→</span></span><span class="cell-title">Why an ERP project takes ten years</span></a><a class="cell nav-cell l-L1" href="#"><span class="tag">Next on this line</span><span class="nav-top"><span class="chip l-L1"><b>1</b>Momentum</span><span class="arrow">→</span></span><span class="cell-title">Coal, rail and the timetable</span></a><a class="cell nav-cell l-L1" href="/#map"><span class="tag">Where you are</span><span class="nav-top"><span class="chip l-L1"><b>1</b>Momentum</span><span class="arrow">→</span></span><span class="cell-title">Station 1 of 6</span><svg viewBox="0 0 300 40" class="l-L1"><path d="M 20 20 H 280" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/><circle cx="20" cy="20" r="9" fill="var(--accent)" stroke="var(--accent)" stroke-width="3"/><circle cx="72" cy="20" r="6" fill="var(--paper)" stroke="var(--accent)" stroke-width="3"/><circle cx="124" cy="20" r="6" fill="var(--paper)" stroke="var(--accent)" stroke-width="3"/><circle cx="176" cy="20" r="6" fill="var(--paper)" stroke="var(--accent)" stroke-width="3"/><circle cx="228" cy="20" r="6" fill="var(--paper)" stroke="var(--accent)" stroke-width="3"/><circle cx="280" cy="20" r="6" fill="var(--paper)" stroke="var(--accent)" stroke-width="3"/></svg></a></section>
+<section class="narrow"><h2 class="h-sec">The story in words</h2><div class="body-text"><p>In March 1776, at the Bloomfield colliery in the English Midlands, a steam engine started pumping water out of the galleries. Engines like it had worked in mines for sixty years. This one came from a new partnership between a Birmingham manufacturer, Matthew Boulton, and a Scottish instrument maker, James Watt, and it burned about a quarter of the coal.</p><p>The secret was a separate condenser. Older engines heated and cooled the same cylinder at every stroke; Watt condensed the steam elsewhere, so the coal went into work rather than into reheating metal. The idea dated from 1765. It took more than ten years, a wealthy partner and a patent extended by Parliament to turn it into an engine anyone could buy.</p><p>Boulton and Watt did not really sell engines. They sold savings: the customer paid a third of the coal saved, for the life of the patent, measured by a counter fitted to the engine. A subscription, indexed on performance, checked by an instrument.</p><p>Then, in the early 1780s, Watt made the engine turn a shaft. Mills, forges and breweries could now draw their power from coal instead of a waterfall, settle in town, and run to the clock all year round. Work stopped following the day, the season or the river. It followed the machine.</p></div>
+<ol class="sources"><li>Richard L. Hills, Power from Steam: A History of the Stationary Steam Engine, Cambridge University Press, 1989.</li><li>Robert C. Allen, The British Industrial Revolution in Global Perspective, Cambridge University Press, 2009.</li></ol><p class="tag">By The Signalman</p></section>
+</main>
+</div>
+</div>
+<script>
+(function () {
+  var lm = document.querySelector('.lang-menu');   // the language menu closes on a click elsewhere or Escape
+  document.addEventListener('click', function (e) { if (lm.open && !lm.contains(e.target)) lm.open = false; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') lm.open = false; });
+  var q = document.getElementById('sn-q'), empty = document.querySelector('.sn-empty');
+  var groups = document.querySelectorAll('.sn-tree details');
+  var initial = Array.prototype.map.call(groups, function (g) { return g.open; });
+  q.addEventListener('input', function () {
+    var v = q.value.trim().toLowerCase(), any = false;
+    groups.forEach(function (g, i) {
+      var head = g.querySelector('summary').textContent.toLowerCase().indexOf(v) > -1, n = 0;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !v || head || li.textContent.toLowerCase().indexOf(v) > -1;
+        li.hidden = !hit; if (hit) n++;
+      });
+      g.hidden = n === 0;
+      g.open = v ? n > 0 : initial[i];
+      if (n) any = true;
+    });
+    empty.hidden = any;
+  });
+  var btn = document.querySelector('.sn-toggle');
+  function setOpen(open, focus) {
+    document.body.classList.toggle('nav-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.title = open ? 'Close navigation' : 'Open navigation';
+    try { localStorage.setItem('terminus-nav', open ? '1' : '0'); } catch (e) {}
+    if (open && focus) q.focus();
+  }
+  setOpen(document.body.classList.contains('nav-open'), false);
+  btn.addEventListener('click', function () { setOpen(!document.body.classList.contains('nav-open'), false); });
+  document.querySelector('.rail-search').addEventListener('click', function () { setOpen(true, true); });
+  document.querySelectorAll('.rail-line').forEach(function (b) {
+    b.addEventListener('click', function () {
+      setOpen(true, false);
+      var g = document.querySelector('.sn-tree details.l-' + b.dataset.line);
+      g.open = true; g.scrollIntoView({ block: 'start' });
+      g.querySelector('summary').focus();
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); setOpen(true, true); }
+    if (e.key === 'Escape' && document.body.classList.contains('nav-open')) setOpen(false, false);
+  });
+})();
+</script>
+</body>
+</html>
