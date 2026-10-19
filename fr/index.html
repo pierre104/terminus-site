@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminus. Et maintenant, par où ?</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<style>:root { --ink: #2B2420; --paper: #FAF5EC; --grey: #8C8174; --panel: #FFFFFF; --line-1: #3A82C4; --line-2: #D9473A; --line-3: #8C55B0; --line-4: #2E9468; --sans: 'Comic Neue', 'Pangolin', system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif; --serif: 'Literata', Georgia, 'Songti SC', SimSun, serif; }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1rem/1.5 var(--sans); }
+a { color: inherit; }
+.l-L1 { --accent: var(--line-1); } .l-L2 { --accent: var(--line-2); }
+.l-L3 { --accent: var(--line-3); } .l-L4 { --accent: var(--line-4); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+.narrow { max-width: 720px; }
+
+/* header + permanent line bar */
+:root { --head-h: 52px; }
+.site-head { position: sticky; top: 0; z-index: 30; }
+.head-row { display: flex; align-items: center; gap: 16px; height: var(--head-h); }
+.wordmark { text-decoration: none; flex: 1; }
+.site-head .wrap { max-width: none; padding-left: 20px; padding-right: 20px; }
+
+/* line chip: number + name, always in the line colour */
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 4px; border-radius: 14px;
+  background: var(--accent); color: #fff; font: 700 0.85rem/1 var(--sans); text-decoration: none; white-space: nowrap; }
+.chip b { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 11px;
+  background: rgba(255, 255, 255, 0.92); color: var(--accent); font-size: 0.75rem; }
+.chip.big { height: 36px; border-radius: 18px; font-size: 1rem; padding-right: 16px; }
+.chip.big b { min-width: 28px; height: 28px; border-radius: 14px; font-size: 0.85rem; }
+
+.h-display { font: 700 clamp(2.4rem, 6vw, 3.6rem)/1.02 var(--sans); margin: 0; letter-spacing: -0.01em; }
+.h-sec { font: 700 1.5rem/1.2 var(--sans); margin: 0 0 18px; }
+.tag { font: 700 0.75rem/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
+section { margin: 0 0 72px; }
+
+/* layout: slim rail always on the left, full pane opens beside it */
+.layout { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.content { min-width: 0; }
+.sidenav { position: sticky; top: var(--head-h); align-self: start; height: calc(100vh - var(--head-h)); display: flex; z-index: 20;
+  border-right: 1px solid color-mix(in srgb, var(--grey) 30%, transparent); background: var(--paper); }
+.rail { width: 60px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; }
+.rail-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--ink); cursor: pointer; text-decoration: none; }
+.rail-btn:hover { background: color-mix(in srgb, var(--grey) 16%, transparent); }
+.rail-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.rail-sep { width: 28px; height: 1px; margin: 6px 0; background: color-mix(in srgb, var(--grey) 35%, transparent); }
+.rail-line { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%;
+  border: 0; background: var(--accent); color: #fff; font: 700 0.95rem/1 var(--sans); cursor: pointer; }
+.rail-line:hover { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.rail-line.current { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--accent); }
+.pane { display: none; width: 260px; height: 100%; overflow-y: auto; padding: 16px 14px 32px 4px; }
+body.nav-open .pane { display: block; }
+.sn-search { position: relative; margin: 0 0 14px; }
+.sn-search input { width: 100%; height: 40px; padding: 0 36px 0 12px; border: 1.5px solid var(--ink); border-radius: 20px;
+  background: var(--panel); color: var(--ink); font: 400 0.95rem var(--sans); }
+.sn-search input:focus { outline: 3px solid color-mix(in srgb, var(--line-1) 40%, transparent); outline-offset: 1px; }
+.sn-search kbd { position: absolute; right: 10px; top: 10px; padding: 1px 6px; border: 1px solid var(--grey); border-radius: 4px;
+  color: var(--grey); font: 600 0.7rem/1.4 var(--sans); }
+.sn-home { display: block; padding: 6px 4px 12px; font-weight: 700; text-decoration: none; }
+.sn-tree details { margin: 0 0 6px; }
+.sn-tree summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 6px 4px; cursor: pointer; list-style: none; border-radius: 8px; }
+.sn-tree summary::-webkit-details-marker { display: none; }
+.sn-tree summary::before { content: "▸"; color: var(--grey); width: 10px; }
+.sn-tree details[open] > summary::before { content: "▾"; }
+.sn-tree summary:hover { background: color-mix(in srgb, var(--grey) 12%, transparent); }
+.sn-tree summary small { flex-basis: 100%; padding-left: 18px; color: var(--grey); font-size: 0.8rem; }
+.sn-sub { padding: 10px 8px 2px; color: var(--grey); font: 700 0.72rem/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; }
+.sn-q a { color: var(--grey); }
+.sn-tree ul { list-style: none; margin: 2px 0 8px 13px; padding: 0 0 0 12px; border-left: 3px solid var(--accent); }
+.sn-tree li a { display: block; padding: 5px 8px; border-radius: 6px; text-decoration: none; font-size: 0.92rem; line-height: 1.3; }
+.sn-tree li a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.sn-tree li a[aria-current] { background: var(--accent); color: #fff; font-weight: 700; }
+.sn-id { display: block; color: var(--grey); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; }
+.sn-tree li a[aria-current] .sn-id { color: rgba(255, 255, 255, 0.85); }
+.sn-empty { color: var(--grey); }
+.sn-legal { display: block; margin: 24px 4px 0; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--grey) 30%, transparent); color: var(--grey); font-size: 0.85rem; }
+.content main { padding-bottom: 48px; }
+@media (max-width: 1000px) {
+  .rail { width: 52px; }
+  .pane { position: fixed; top: var(--head-h); bottom: 0; left: 52px; width: min(300px, calc(100vw - 64px)); background: var(--paper);
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.35); }
+}
+
+/* comic grid: 3 columns, panels of 1, 2 or 3 columns */
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.cell { position: relative; min-height: 260px; border-radius: 6px; }
+.c-wide { grid-column: span 2; }
+.c-full { grid-column: 1 / -1; min-height: 300px; }
+.c-tall { grid-row: span 2; }
+.frame { background: var(--panel); border: 1.5px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.frame .desc { margin: auto 18px; text-align: center; color: var(--grey); font: italic 400 0.95rem/1.4 var(--serif); }
+.narr { position: absolute; top: 12px; left: 12px; max-width: 70%; padding: 8px 12px; background: var(--paper);
+  border: 1.5px solid var(--ink); font: 700 0.95rem/1.3 var(--sans); }
+.balloon { position: absolute; max-width: 62%; padding: 12px 16px; background: var(--panel); border: 1.5px solid var(--ink);
+  font: 700 1.05rem/1.3 var(--sans); }
+.balloon::after { content: ""; position: absolute; bottom: -12px; left: 28px; width: 18px; height: 18px; background: var(--panel);
+  border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: rotate(45deg) skew(12deg, 12deg); }
+.balloon.tl { top: 16px; left: 16px; } .balloon.tr { top: 16px; right: 16px; }
+.panel-no { position: absolute; bottom: 8px; right: 10px; }
+
+/* takeaway cell */
+.takeaways { background: color-mix(in srgb, var(--accent) 9%, #fff); border: 1.5px solid var(--accent); padding: 22px; }
+.takeaways ol { list-style: none; counter-reset: k; margin: 12px 0 0; padding: 0; }
+.takeaways li { counter-increment: k; position: relative; padding: 0 0 16px 40px; font: 700 1.05rem/1.35 var(--sans); }
+.takeaways li:last-child { padding-bottom: 0; }
+.takeaways li::before { content: counter(k); position: absolute; left: 0; top: -2px; width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; font-size: 0.9rem; }
+
+/* navigation cells: related and next sit on the comic grid */
+.nav-cell { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; padding: 20px; text-decoration: none;
+  border: 2px solid var(--accent); background: var(--panel); }
+.nav-cell:hover { background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.cell-title { font: 700 1.35rem/1.2 var(--sans); }
+.nav-cell .chip { align-self: flex-start; }
+.cell.nav-cell { min-height: 0; padding: 16px 18px; gap: 10px; justify-content: flex-start; }
+.nav-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.nav-cell svg { width: 100%; max-width: 260px; height: auto; }
+.nav-cell .cell-title { font-size: 1.15rem; }
+.arrow { font: 700 1.6rem/1 var(--sans); color: var(--accent); align-self: flex-end; }
+
+@media (max-width: 760px) {
+  .grid3 { grid-template-columns: 1fr; }
+  .c-wide, .c-full { grid-column: auto; }
+  .c-tall { grid-row: auto; }
+}
+
+/* home */
+.cover { padding-top: 24px; margin-bottom: 0; }
+.cover .h-display { margin-bottom: 20px; }
+/* the whole comic fits the screen with the first lines of the manifesto showing below it on landing:
+   header 52 + top 24 + gap 20 + about three lines of text 110 */
+.cover-comic { display: block; max-width: 100%; max-height: calc(100vh - 206px); width: auto; height: auto; margin: 0 auto 20px; background: #fff; }
+.manifesto { font: 400 1.35rem/1.55 var(--serif); }
+.manifesto p { margin: 0 0 1em; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.map-fig { margin: 0 0 18px; overflow-x: auto; }
+.map-fig svg { display: block; width: 100%; min-width: 900px; height: auto; }
+.m-line { fill: none; stroke: var(--accent); stroke-width: 8px; stroke-linecap: round; stroke-linejoin: round; }
+.m-sleepers { fill: none; stroke: var(--accent); stroke-width: 18px; stroke-dasharray: 3 11; opacity: 0.55; }
+.explore { --accent: color-mix(in srgb, var(--grey) 45%, var(--paper)); }
+.m-path { fill: none; stroke: var(--accent); stroke-width: 6px; stroke-linecap: round; stroke-dasharray: 0.1 13; }
+.m-st, .m-end { fill: var(--paper); stroke: var(--accent); stroke-width: 5px; }
+.m-label { font: 700 14px var(--sans); fill: var(--ink); }
+.m-status { font: 700 10.5px var(--sans); letter-spacing: 0.06em; fill: var(--grey); text-transform: uppercase; }
+.m-name { font: 700 17px var(--sans); fill: var(--accent); letter-spacing: 0.02em; text-transform: uppercase; }
+.m-sub { font: 400 13px var(--sans); fill: var(--grey); }
+.m-term { fill: var(--ink); }
+.m-term-t { font: 700 15px var(--sans); fill: var(--ink); letter-spacing: 0.3em; }
+.map-fig a:hover .m-st { stroke-width: 6px; }
+.head-right { display: flex; align-items: center; gap: 18px; }
+/* language menu: a small flag that opens onto the four languages */
+.lang-menu { position: relative; font: 700 0.85rem/1 var(--sans); }
+.lang-menu summary { list-style: none; display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 6px; cursor: pointer; opacity: 0.85; }
+.lang-menu summary::-webkit-details-marker { display: none; }
+.lang-menu summary::after { content: ""; width: 5px; height: 5px; margin-left: 1px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: translateY(-2px) rotate(45deg); }
+.lang-menu summary:hover, .lang-menu[open] summary { opacity: 1; background: color-mix(in srgb, var(--paper) 14%, transparent); }
+.lang-menu .lm-code { font-size: 0.75rem; letter-spacing: 0.06em; }
+.flag { display: inline-flex; width: 21px; height: 14px; flex: none; border-radius: 2px; overflow: hidden; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25); }
+.flag svg { width: 100%; height: 100%; }
+.lang-menu ul { position: absolute; right: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none; min-width: 160px;
+  background: var(--panel); border-radius: 8px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); z-index: 40; }
+.site-head .lang-menu ul a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; color: var(--ink); font-weight: 400; text-decoration: none; }
+.lang-menu ul a:hover { background: color-mix(in srgb, var(--grey) 14%, transparent); }
+.lang-menu ul a[aria-current] { font-weight: 700; }
+@media (max-width: 600px) { .head-right .tag { display: none; } }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
+.card { display: flex; flex-direction: column; gap: 10px; }
+.card .thumb { aspect-ratio: 4 / 3; border: 1.5px solid var(--accent); border-radius: 6px; background: var(--panel);
+  display: flex; align-items: flex-end; padding: 10px; }
+.card h3 { font: 700 1.35rem/1.2 var(--sans); margin: 0; }
+.card h3 a { text-decoration: none; }
+.card p { margin: 0; font: 400 1.05rem/1.45 var(--serif); }
+.related { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 0.9rem; color: var(--grey); }
+.related a { color: var(--ink); font-weight: 700; }
+
+/* article */
+.art-head { padding: 36px 0 24px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.art-title { font: 700 clamp(2rem, 5vw, 3rem)/1.05 var(--sans); margin: 0; }
+.art-related { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--grey); }
+.art-related a { color: var(--ink); font-weight: 700; }
+.body-text { font: 400 1.2rem/1.65 var(--serif); }
+.body-text p { margin: 0 0 1.1em; }
+.sources { color: var(--grey); font-size: 0.9rem; }
+
+.site-head { background: var(--ink); color: var(--paper); }
+.site-head a { color: var(--paper); }
+.wordmark { font: 700 1.5rem/1 var(--sans); text-transform: uppercase; font-style: italic; }
+.h-display, .h-sec, .cell-title, .art-title { text-transform: uppercase; }
+.h-display { font-style: italic; }
+.balloon { border-radius: 22px; }
+.frame { border-radius: 10px; }
+</style>
+</head>
+<body class="bulle">
+<script>try { if (localStorage.getItem('terminus-nav') === '1' && matchMedia('(min-width: 1001px)').matches) document.body.classList.add('nav-open'); } catch (e) {}</script>
+<header class="site-head"><div class="wrap head-row"><a class="wordmark" href="/fr/">Terminus</a><span class="head-right"><span class="tag">Et maintenant, par où ?</span><details class="lang-menu"><summary aria-label="Langue: Français"><span class="flag"><svg viewBox="0 0 3 2"><path d="M0 0h1v2H0z" fill="#002654"/><path d="M1 0h1v2H1z" fill="#fff"/><path d="M2 0h1v2H2z" fill="#CE1126"/></svg></span><span class="lm-code">FR</span></summary><ul><li><a href="/" hreflang="en" lang="en"><span class="flag"><svg viewBox="0 0 60 40"><g><path d="M0 0h60v40H0z" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0l60 40M60 0L0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="12"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="7"/></g></svg></span>English</a></li><li><a href="/fr/" hreflang="fr" lang="fr" aria-current="true"><span class="flag"><svg viewBox="0 0 3 2"><path d="M0 0h1v2H0z" fill="#002654"/><path d="M1 0h1v2H1z" fill="#fff"/><path d="M2 0h1v2H2z" fill="#CE1126"/></svg></span>Français</a></li><li><a href="/ru/" hreflang="ru" lang="ru"><span class="flag"><svg viewBox="0 0 3 2"><path d="M0 0h3v2H0z" fill="#fff"/><path d="M0 .667h3v.667H0z" fill="#0039A6"/><path d="M0 1.333h3V2H0z" fill="#D52B1E"/></svg></span>Русский</a></li><li><a href="/zh/" hreflang="zh" lang="zh"><span class="flag"><svg viewBox="0 0 30 20"><path d="M0 0h30v20H0z" fill="#DE2910"/><path d="M5 2.2l1.3 3.9h4.1l-3.3 2.4 1.3 3.9L5 10 1.6 12.4l1.3-3.9L-.4 6.1h4.1z" fill="#FFDE00"/><g fill="#FFDE00"><circle cx="10" cy="2" r=".9"/><circle cx="12" cy="4" r=".9"/><circle cx="12" cy="7" r=".9"/><circle cx="10" cy="9" r=".9"/></g></svg></span>中文</a></li></ul></details></span></div></header>
+<div class="layout">
+<aside class="sidenav" id="sidenav" aria-label="All topics">
+<div class="rail">
+<button class="rail-btn sn-toggle" aria-controls="sn-pane" aria-expanded="false" title="Ouvrir la navigation"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<button class="rail-btn rail-search" title="Search (/)" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+<a class="rail-btn" href="/fr/" title="Accueil et carte" aria-label="Accueil et carte"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></a>
+<span class="rail-sep"></span>
+<button class="rail-line l-L1" data-line="L1" title="1 Momentum: Comment on en est arrivé là" aria-label="Ligne 1, Momentum">1</button><button class="rail-line l-L2" data-line="L2" title="2 Endgame: Comment ça finit" aria-label="Ligne 2, Endgame">2</button><button class="rail-line l-L3" data-line="L3" title="3 Déjà vu: Ce n&#x27;est pas la première fois" aria-label="Ligne 3, Déjà vu">3</button><button class="rail-line l-L4" data-line="L4" title="4 Ways out: Et maintenant, par où ?" aria-label="Ligne 4, Ways out">4</button>
+</div>
+<div class="pane" id="sn-pane">
+<div class="sn-search"><input id="sn-q" type="search" placeholder="Tout rechercher" aria-label="Chercher lignes, stations et questions" autocomplete="off"><kbd>/</kbd></div>
+<a class="sn-home" href="/fr/">Accueil et carte</a>
+<nav class="sn-tree"><details class="l-L1"><summary><span class="chip l-L1"><b>1</b>Momentum</span><small>Comment on en est arrivé là</small></summary><ul><li><a href="/l1-01/"><span class="sn-id">L1-01</span>1776 : la machine démarre</a></li><li><a href="#"><span class="sn-id">L1-02</span>Charbon, rail et horaires</a></li><li><a href="#"><span class="sn-id">L1-03</span>L&#x27;électricité recâble l&#x27;usine</a></li><li><a href="#"><span class="sn-id">L1-04</span>Le pétrole et la vie en série</a></li><li><a href="#"><span class="sn-id">L1-05</span>De l&#x27;ordinateur central à la poche</a></li><li><a href="#"><span class="sn-id">L1-06</span>Le logiciel avale l&#x27;entreprise</a></li><li><a href="#"><span class="sn-id">L1-07</span>Chef ou gestionnaire ?</a></li></ul></details><details class="l-L2"><summary><span class="chip l-L2"><b>2</b>Endgame</span><small>Comment ça finit</small></summary><ul><li><a href="#"><span class="sn-id">L2-01</span>Des rendements décroissants</a></li><li><a href="#"><span class="sn-id">L2-02</span>Énergie : l&#x27;addition arrive</a></li><li><a href="#"><span class="sn-id">L2-03</span>Trop connecté pour tomber ?</a></li><li><a href="#"><span class="sn-id">L2-04</span>Déclin lent ou rupture brutale ?</a></li><li><a href="#"><span class="sn-id">L2-05</span>Trois scénarios pour 2050</a></li></ul></details><details class="l-L3"><summary><span class="chip l-L3"><b>3</b>Déjà vu</span><small>Ce n&#x27;est pas la première fois</small></summary><ul><li><a href="#"><span class="sn-id">L3-01</span>L&#x27;effondrement de l&#x27;âge du bronze</a></li><li><a href="#"><span class="sn-id">L3-02</span>Le long adieu de Rome</a></li><li><a href="#"><span class="sn-id">L3-03</span>Les cycles longs de Kondratiev</a></li><li><a href="#"><span class="sn-id">L3-04</span>Tainter : le prix de la complexité</a></li><li><a href="#"><span class="sn-id">L3-05</span>La destruction créatrice</a></li></ul></details><details class="l-L4"><summary><span class="chip l-L4"><b>4</b>Ways out</span><small>Et maintenant, par où ?</small></summary><ul><li><a href="#"><span class="sn-id">L4-01</span>Ce qui marche encore</a></li><li><a href="#"><span class="sn-id">L4-02</span>Les compétences qui voyagent</a></li><li><a href="#"><span class="sn-id">L4-03</span>Vos systèmes sont plus vieux que vous</a></li><li><a href="#"><span class="sn-id">L4-04</span>La question de l&#x27;ERP</a></li><li><a href="#"><span class="sn-id">L4-05</span>Petit, local, réparable</a></li><li><a href="#"><span class="sn-id">L4-06</span>Terminus, tout le monde descend</a></li><li class="sn-sub">Questions ouvertes</li><li class="sn-q"><a href="#">À quoi s&#x27;occuper ?</a></li><li class="sn-q"><a href="#">Que deviennent le pouvoir et la domination ?</a></li><li class="sn-q"><a href="#">Que devient l&#x27;éducation ?</a></li><li class="sn-q"><a href="#">Où est la prochaine gare centrale ?</a></li></ul></details></nav>
+<p class="sn-empty" hidden>Aucun résultat.</p>
+<a class="sn-legal" href="/fr/legal/">Mentions légales</a>
+</div>
+</aside>
+<div class="content">
+<main class="wrap">
+<section class="cover"><h1 class="visually-hidden">Terminus</h1><img class="cover-comic" src="/cover/home-cover-fr.png" alt="Bande dessinée. 1776 — L&#x27;innovation fut un passe-temps... Un village ; de la vapeur sort d&#x27;une maison : « Elle roule !! » « James Watt ! Viens manger ta soupe et arrête de jouer avec cette chaudière ! » 1850 — ... puis elle a balayé le secteur primaire ... Une machine à vapeur emmène des paysans vers une usine : « Comment qu&#x27;la patate e&#x27; pousse là-d&#x27;ssous. » 1920–1980 — ... puis vint le tour de l&#x27;industrie ... Des ouvriers chargés dans un train devant une usine, puis un train qui passe devant une université vers des tours de bureaux : « Grand-mère disait : « la route, si t&#x27;y vois pas où ça va, t&#x27;y vas pas ». » 2026 — ... prochain arrêt : tertiaire, tout le monde descend Un père, une fourche et un ordinateur portable à la main, parle avec sa fille ; derrière eux, l&#x27;Office Express fonce vers une falaise. Elle demande : « Mais alors papa, si c&#x27;est ça le plan, pourquoi aller à l&#x27;école ? » Il répond : « Ce que tu apprends est ton seul vrai trésor. C&#x27;est comme ça que tu descendras du train à temps. Nous n&#x27;avons pas inventé tant que ça sur les sociétés au cours des siècles : je vais t&#x27;expliquer... »" width="1600" height="1328"></section>
+<section class="manifesto"><p>Pendant 250 ans, chaque génération pouvait dire à la suivante : apprends, sois productif, touche ton salaire et demain sera encore meilleur qu&#x27;aujourd&#x27;hui.</p><p>Cette promesse reposait sur une complexité croissante et une technologie toujours plus performante pour y répondre. Peu à peu, la finance en a donné la cadence : de l&#x27;or à la monnaie papier et enfin numérique, elle est devenue la mesure de presque tous les échanges humains. Et, pour finir, l&#x27;essentiel s&#x27;est distribué dans les bureaux.</p><p>Terminus s&#x27;intéresse au moment où cette promesse semble moins évidente. Nous ne vendons pas une solution. Nous remontons l&#x27;histoire pour comprendre comment nous en sommes arrivés là, quand ce genre de transition s&#x27;est produit dans le passé et comment ces cycles ont fini. Sortant de la gare, nous regardons les voies qui s&#x27;ouvrent, nouvelles et pourtant tellement évidentes dans des époques passées.</p></section>
+<section id="map"><h2 class="h-sec">Parcourir la carte</h2><figure class="map-fig"><svg viewBox="0 0 1300 600" role="img" aria-label="Plan des lignes"><g class="map-lines"><path class="m-line l-L1" d="M 230 110 H 600 L 700 250"/><path class="m-line l-L2" d="M 230 300 H 700"/><path class="m-line l-L3" d="M 230 490 H 600 L 700 350"/><path class="m-sleepers l-L4" d="M 748 300 H 1270"/><path class="m-line l-L4" d="M 748 300 H 1270"/><path class="m-path explore" d="M 748 222 C 820 222, 760 90, 880 90"/><path class="m-path explore" d="M 748 250 C 820 250, 960 150, 1080 150"/><path class="m-path explore" d="M 748 350 C 820 350, 960 450, 1080 450"/><path class="m-path explore" d="M 748 378 C 820 378, 760 510, 880 510"/></g><rect class="m-term" x="700" y="210" width="48" height="180" rx="10"/><text class="m-term-t" x="724" y="420" text-anchor="middle">TERMINUS</text><g class="l-L1"><text class="m-name" x="30" y="106">L1 Momentum</text><text class="m-sub" x="30" y="124">Comment on en est arrivé là</text></g><a class="l-L1" href="/l1-01/"><circle class="m-st" cx="255" cy="110" r="10"/><text class="m-label open" x="255" y="58" text-anchor="middle"><tspan x="255" dy="0">1776 : la</tspan><tspan x="255" dy="17">machine</tspan><tspan x="255" dy="17">démarre</tspan></text></a><a class="l-L1" href="#"><circle class="m-st" cx="311" cy="110" r="10"/><text class="m-label upcoming" x="311" y="142" text-anchor="middle"><tspan x="311" dy="0">Charbon, rail</tspan><tspan x="311" dy="17">et horaires</tspan></text></a><a class="l-L1" href="#"><circle class="m-st" cx="367" cy="110" r="10"/><text class="m-label upcoming" x="367" y="58" text-anchor="middle"><tspan x="367" dy="0">L&#x27;électricité</tspan><tspan x="367" dy="17">recâble</tspan><tspan x="367" dy="17">l&#x27;usine</tspan></text></a><a class="l-L1" href="#"><circle class="m-st" cx="422" cy="110" r="10"/><text class="m-label upcoming" x="422" y="142" text-anchor="middle"><tspan x="422" dy="0">Le pétrole et</tspan><tspan x="422" dy="17">la vie en</tspan><tspan x="422" dy="17">série</tspan></text></a><a class="l-L1" href="#"><circle class="m-st" cx="478" cy="110" r="10"/><text class="m-label upcoming" x="478" y="41" text-anchor="middle"><tspan x="478" dy="0">De</tspan><tspan x="478" dy="17">l&#x27;ordinateur</tspan><tspan x="478" dy="17">central à la</tspan><tspan x="478" dy="17">poche</tspan></text></a><a class="l-L1" href="#"><circle class="m-st" cx="534" cy="110" r="10"/><text class="m-label upcoming" x="534" y="142" text-anchor="middle"><tspan x="534" dy="0">Le logiciel</tspan><tspan x="534" dy="17">avale</tspan><tspan x="534" dy="17">l&#x27;entreprise</tspan></text></a><a class="l-L1" href="#"><circle class="m-st" cx="590" cy="110" r="10"/><text class="m-label upcoming" x="590" y="75" text-anchor="middle"><tspan x="590" dy="0">Chef ou</tspan><tspan x="590" dy="17">gestionnaire ?</tspan></text></a><g class="l-L2"><text class="m-name" x="30" y="296">L2 Endgame</text><text class="m-sub" x="30" y="314">Comment ça finit</text></g><a class="l-L2" href="#"><circle class="m-st" cx="255" cy="300" r="10"/><text class="m-label open" x="255" y="265" text-anchor="middle"><tspan x="255" dy="0">Des rendements</tspan><tspan x="255" dy="17">décroissants</tspan></text></a><a class="l-L2" href="#"><circle class="m-st" cx="339" cy="300" r="10"/><text class="m-label upcoming" x="339" y="332" text-anchor="middle"><tspan x="339" dy="0">Énergie :</tspan><tspan x="339" dy="17">l&#x27;addition</tspan><tspan x="339" dy="17">arrive</tspan></text></a><a class="l-L2" href="#"><circle class="m-st" cx="422" cy="300" r="10"/><text class="m-label upcoming" x="422" y="265" text-anchor="middle"><tspan x="422" dy="0">Trop connecté</tspan><tspan x="422" dy="17">pour tomber ?</tspan></text></a><a class="l-L2" href="#"><circle class="m-st" cx="506" cy="300" r="10"/><text class="m-label subscribers" x="506" y="332" text-anchor="middle"><tspan x="506" dy="0">Déclin lent ou</tspan><tspan x="506" dy="17">rupture</tspan><tspan x="506" dy="17">brutale ?</tspan></text></a><a class="l-L2" href="#"><circle class="m-st" cx="590" cy="300" r="10"/><text class="m-label upcoming" x="590" y="248" text-anchor="middle"><tspan x="590" dy="0">Trois</tspan><tspan x="590" dy="17">scénarios pour</tspan><tspan x="590" dy="17">2050</tspan></text></a><g class="l-L3"><text class="m-name" x="30" y="486">L3 Déjà vu</text><text class="m-sub" x="30" y="504">Ce n&#x27;est pas la première fois</text></g><a class="l-L3" href="#"><circle class="m-st" cx="255" cy="490" r="10"/><text class="m-label upcoming" x="255" y="438" text-anchor="middle"><tspan x="255" dy="0">L&#x27;effondrement</tspan><tspan x="255" dy="17">de l&#x27;âge du</tspan><tspan x="255" dy="17">bronze</tspan></text></a><a class="l-L3" href="#"><circle class="m-st" cx="339" cy="490" r="10"/><text class="m-label upcoming" x="339" y="522" text-anchor="middle"><tspan x="339" dy="0">Le long adieu</tspan><tspan x="339" dy="17">de Rome</tspan></text></a><a class="l-L3" href="#"><circle class="m-st" cx="422" cy="490" r="10"/><text class="m-label upcoming" x="422" y="438" text-anchor="middle"><tspan x="422" dy="0">Les cycles</tspan><tspan x="422" dy="17">longs de</tspan><tspan x="422" dy="17">Kondratiev</tspan></text></a><a class="l-L3" href="#"><circle class="m-st" cx="506" cy="490" r="10"/><text class="m-label open" x="506" y="522" text-anchor="middle"><tspan x="506" dy="0">Tainter : le</tspan><tspan x="506" dy="17">prix de la</tspan><tspan x="506" dy="17">complexité</tspan></text></a><a class="l-L3" href="#"><circle class="m-st" cx="590" cy="490" r="10"/><text class="m-label upcoming" x="590" y="455" text-anchor="middle"><tspan x="590" dy="0">La destruction</tspan><tspan x="590" dy="17">créatrice</tspan></text></a><a class="l-L4" href="#"><circle class="m-st" cx="800" cy="300" r="10"/><text class="m-label upcoming" x="800" y="265" text-anchor="middle"><tspan x="800" dy="0">Ce qui marche</tspan><tspan x="800" dy="17">encore</tspan></text></a><a class="l-L4" href="#"><circle class="m-st" cx="888" cy="300" r="10"/><text class="m-label upcoming" x="888" y="332" text-anchor="middle"><tspan x="888" dy="0">Les</tspan><tspan x="888" dy="17">compétences</tspan><tspan x="888" dy="17">qui voyagent</tspan></text></a><a class="l-L4" href="#"><circle class="m-st" cx="976" cy="300" r="10"/><text class="m-label subscribers" x="976" y="248" text-anchor="middle"><tspan x="976" dy="0">Vos systèmes</tspan><tspan x="976" dy="17">sont plus</tspan><tspan x="976" dy="17">vieux que vous</tspan></text></a><a class="l-L4" href="#"><circle class="m-st" cx="1064" cy="300" r="10"/><text class="m-label upcoming" x="1064" y="332" text-anchor="middle"><tspan x="1064" dy="0">La question de</tspan><tspan x="1064" dy="17">l&#x27;ERP</tspan></text></a><a class="l-L4" href="#"><circle class="m-st" cx="1152" cy="300" r="10"/><text class="m-label upcoming" x="1152" y="265" text-anchor="middle"><tspan x="1152" dy="0">Petit, local,</tspan><tspan x="1152" dy="17">réparable</tspan></text></a><a class="l-L4" href="#"><circle class="m-st" cx="1240" cy="300" r="10"/><text class="m-label upcoming" x="1240" y="332" text-anchor="middle"><tspan x="1240" dy="0">Terminus, tout</tspan><tspan x="1240" dy="17">le monde</tspan><tspan x="1240" dy="17">descend</tspan></text></a><g class="explore"><circle class="m-end" cx="880" cy="90" r="8"/><text class="m-label upcoming" x="896" y="95.0" text-anchor="start"><tspan x="896" dy="0">À quoi s&#x27;occuper ?</tspan></text></g><g class="explore"><circle class="m-end" cx="1080" cy="150" r="8"/><text class="m-label upcoming" x="1096" y="138.0" text-anchor="start"><tspan x="1096" dy="0">Que deviennent le</tspan><tspan x="1096" dy="17">pouvoir et la</tspan><tspan x="1096" dy="17">domination ?</tspan></text></g><g class="explore"><circle class="m-end" cx="1080" cy="450" r="8"/><text class="m-label subscribers" x="1096" y="446.5" text-anchor="start"><tspan x="1096" dy="0">Que devient</tspan><tspan x="1096" dy="17">l&#x27;éducation ?</tspan></text></g><g class="explore"><circle class="m-end" cx="880" cy="510" r="8"/><text class="m-label upcoming" x="896" y="506.5" text-anchor="start"><tspan x="896" dy="0">Où est la prochaine gare</tspan><tspan x="896" dy="17">centrale ?</tspan></text></g><g class="l-L4"><text class="m-name" x="1100" y="204">L4 Ways out</text><text class="m-sub" x="1100" y="222">Et maintenant, par où ?</text></g></svg></figure></section>
+<section id="latest"><h2 class="h-sec">À lire</h2><div class="cards"><article class="card l-L1"><div class="thumb"><span class="chip l-L1"><b>1</b>Momentum</span></div><h3><a href="/l1-01/">1776 : la machine démarre</a></h3><p>La machine de Watt ne pompe pas seulement l&#x27;eau des mines. Elle donne le tempo de tout ce qui suit.</p></article><article class="card l-L2"><div class="thumb"><span class="chip l-L2"><b>2</b>Endgame</span></div><h3><a href="#">Des rendements décroissants</a></h3><p>Chaque nouvelle génération de technologie coûte plus cher pour un gain plus petit. Jusqu&#x27;où ?</p></article><article class="card l-L3"><div class="thumb"><span class="chip l-L3"><b>3</b>Déjà vu</span></div><h3><a href="#">Tainter : le prix de la complexité</a></h3><p>Chaque problème résolu ajoute une couche. Un jour, la couche suivante coûte plus qu&#x27;elle ne rapporte.</p></article></div></section>
+</main>
+</div>
+</div>
+<script>
+(function () {
+  var lm = document.querySelector('.lang-menu');   // the language menu closes on a click elsewhere or Escape
+  document.addEventListener('click', function (e) { if (lm.open && !lm.contains(e.target)) lm.open = false; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') lm.open = false; });
+  var q = document.getElementById('sn-q'), empty = document.querySelector('.sn-empty');
+  var groups = document.querySelectorAll('.sn-tree details');
+  var initial = Array.prototype.map.call(groups, function (g) { return g.open; });
+  q.addEventListener('input', function () {
+    var v = q.value.trim().toLowerCase(), any = false;
+    groups.forEach(function (g, i) {
+      var head = g.querySelector('summary').textContent.toLowerCase().indexOf(v) > -1, n = 0;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !v || head || li.textContent.toLowerCase().indexOf(v) > -1;
+        li.hidden = !hit; if (hit) n++;
+      });
+      g.hidden = n === 0;
+      g.open = v ? n > 0 : initial[i];
+      if (n) any = true;
+    });
+    empty.hidden = any;
+  });
+  var btn = document.querySelector('.sn-toggle');
+  function setOpen(open, focus) {
+    document.body.classList.toggle('nav-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.title = open ? 'Close navigation' : 'Open navigation';
+    try { localStorage.setItem('terminus-nav', open ? '1' : '0'); } catch (e) {}
+    if (open && focus) q.focus();
+  }
+  setOpen(document.body.classList.contains('nav-open'), false);
+  btn.addEventListener('click', function () { setOpen(!document.body.classList.contains('nav-open'), false); });
+  document.querySelector('.rail-search').addEventListener('click', function () { setOpen(true, true); });
+  document.querySelectorAll('.rail-line').forEach(function (b) {
+    b.addEventListener('click', function () {
+      setOpen(true, false);
+      var g = document.querySelector('.sn-tree details.l-' + b.dataset.line);
+      g.open = true; g.scrollIntoView({ block: 'start' });
+      g.querySelector('summary').focus();
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); setOpen(true, true); }
+    if (e.key === 'Escape' && document.body.classList.contains('nav-open')) setOpen(false, false);
+  });
+})();
+</script>
+</body>
+</html>
